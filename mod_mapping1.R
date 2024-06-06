@@ -199,7 +199,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         )
         train_param<-as.data.frame(train_param)
         # insert_upload_job(table_con$project, table_con$dataset, "es_mappingR1", train_param)
-        es_mapping_tab = bq_table(project = project, dataset = dataset, table = 'es_mappingR1')
+        es_mapping_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'es_mappingR1')
         bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
         removeUI(
@@ -525,7 +525,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         polygons$geometry<-st_as_text(polygon$geometry)
         update_modal_progress(0.15, text = "update data base")
         #save it on bq
-        poly_table = bq_table(project = project, dataset = dataset, table = 'ind_polys_R1')
+        poly_table = bq_table(project = "eu-wendy", dataset = dataset, table = 'ind_polys_R1')
         bq_table_upload(x = poly_table, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
 
@@ -535,7 +535,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
 
         # sample pts for random forest
         tmp_pts = st_sample(polygon, 30,type="random")
-        crs(pred) <- "+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +datum=WGS84"
+        # crs(pred) <- "+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +datum=WGS84"
         tmp_pts<-st_transform(tmp_pts,st_crs(pred))
         pts <- do.call(rbind, st_geometry(tmp_pts)) %>%
           as_tibble() %>% setNames(c("lon","lat"))
@@ -622,7 +622,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         ############ maxent
         update_modal_progress(0.4, text = "update data base")
         # write to bq
-        es_mapping_tab = bq_table(project = project, dataset = dataset, table = 'es_mappingR1')
+        es_mapping_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'es_mappingR1')
         bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
 
@@ -640,7 +640,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         writeRaster(prediction, filename = temp_file, format = "GTiff")
 
         file_name <-paste0(site_id,"/",rand_es_sel$esID,"/",userID)
-        gcs_upload(temp_file, bucket_name, name = file_name, predefinedAcl = "bucketLevel")
+        gcs_upload(temp_file, "ind_es", name = file_name, predefinedAcl = "bucketLevel")
         file.remove(temp_file)
 
       update_modal_progress(0.9, text = "draw map model")
@@ -648,7 +648,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       output$res_map <- renderLeaflet({
         leaflet()%>%
           addProviderTiles(providers$CartoDB.Positron,options = tileOptions(minZoom = 8, maxZoom = 15))%>%
-          setView(lng = 10, lat = 63.4, zoom = 9)%>%
+          # setView(lng = 10, lat = 63.4, zoom = 9)%>%
           addRasterImage(prediction, opacity = 0.5)
       })
       remove_modal_progress()

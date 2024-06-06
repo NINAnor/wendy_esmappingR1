@@ -52,6 +52,55 @@ function(input, output, session) {
     site_id<-input$in_siteID
   })
 
+  ## download gcs rasters for RF prediction
+  pred<-eventReactive(input$sub0,{
+    req(site_id)
+    site_id <-site_id()
+
+
+
+    # gcs_auth("bq_wendy.json")
+
+    # gcs_get_bucket("pred_es") #name of the bucket that you have created
+    # bucket_name <- "pred_es"
+    # gcs_global_bucket("pred_es")
+    path<-paste0("env_var_",site_id)
+    if(dir.exists(paths = path)==F){
+      show_modal_spinner(text = "fetch geodata from server")
+      dir.create(file.path(path))
+      ## download the prepared env data from gcs
+
+      # lulc<-paste0("gs://pred_es/",site_id,"/lulc.tif")
+      # gcs_get_object(lulc, bucket = bucket_name, saveToDisk = "env_var_gcs/lulc.tif")
+
+      dem<-paste0("gs://pred_es/",site_id,"/dem.tif")
+      gcs_get_object(dem, bucket = bucket_name, saveToDisk = paste0(path,"/dem.tif"))
+
+      acc<-paste0("gs://pred_es/",site_id,"/access.tif")
+      gcs_get_object(acc, bucket = bucket_name, saveToDisk = paste0(path,"/acc.tif"))
+
+      eii<-paste0("gs://pred_es/",site_id,"/eii.tif")
+      gcs_get_object(eii, bucket = bucket_name, saveToDisk = paste0(path,"/eii.tif"))
+
+      ## align raster
+      acc<-terra::rast(paste0(path,"/acc.tif"))%>%terra::project(crs("+init=epsg:4326"))
+      dem<-terra::rast(paste0(path,"/dem.tif"))%>%terra::project(crs("+init=epsg:4326"))
+      eii<-terra::rast(paste0(path,"/eii.tif"))%>%terra::project(crs("+init=epsg:4326"))
+
+      acc<-terra::resample(acc,dem)
+      eii<-terra::resample(eii,dem)
+      terra::writeRaster(dem,paste0(path,"/dem.tif"),overwrite=T)
+      terra::writeRaster(acc,paste0(path,"/acc.tif"),overwrite=T)
+      terra::writeRaster(eii,paste0(path,"/eii.tif"),overwrite=T)
+      remove_modal_spinner()
+    }
+
+    #load both
+    pred<-paste0(path,"/")
+    pred<-load_var(path=pred)
+
+  })
+
   ##extract site_type
   site_type<-eventReactive(input$sub0,{
     studies<-studies%>%filter(siteID == input$in_siteID)%>%
@@ -145,6 +194,8 @@ function(input, output, session) {
     userID<-stri_rand_strings(1, nchar, pattern = "[A-Za-z0-9]")
   })
 
+
+
   ## save user data in the DB and open the questionnaire module
   observeEvent(input$sub1,{
     sf_stud_geom<-sf_stud_geom()
@@ -165,9 +216,6 @@ function(input, output, session) {
       siteID = site_id,
       projID = project
     )
-
-
-
 
     #
     user_conf_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'user_conf')
@@ -204,11 +252,11 @@ function(input, output, session) {
     rv$v<-mod_instructions_server("training_1")
   })
 
-  pred<-eventReactive(rv$u(),{
-    sf_stud_geom<-sf_stud_geom()
-    pred <- elevatr::get_elev_raster(locations = sf_stud_geom, z = 9, clip = "locations")
-    pred<- load_var(pred)
-  })
+  # pred<-eventReactive(rv$u(),{
+  #   sf_stud_geom<-sf_stud_geom()
+  #   pred <- elevatr::get_elev_raster(locations = sf_stud_geom, z = 9, clip = "locations")
+  #   pred<- load_var(pred)
+  # })
 
   #######################
   ### create N tabs

@@ -25,7 +25,7 @@ library(tidyverse)
 library(shinyBS)
 library(shinybusy)
 library(googleCloudStorageR)
-library(raster)
+library(terra)
 library(elevatr)
 
 
@@ -39,13 +39,13 @@ bq_auth(
   path = "bq_wendy.json"
 )
 
-### test the upload of a raster from app memory
+###GCS auth
 gcs_auth("bq_wendy.json")
-
-gcs_get_bucket("ind_es") #name of the bucket that you have created
-bucket_name <- "ind_es"
-gcs_global_bucket("ind_es") #set it as global bucket
-gcs_get_global_bucket() #check if your bucket is set as global,you should get your bucket name
+#
+# gcs_get_bucket("ind_es") #name of the bucket that you have created
+# bucket_name <- "ind_es"
+# gcs_global_bucket("ind_es") #set it as global bucket
+# gcs_get_global_bucket() #check if your bucket is set as global,you should get your bucket name
 
 
 env<-"dev"
@@ -68,8 +68,10 @@ con_admin <- dbConnect(
   billing = con_admin$billing
 )
 
-studies<-tbl(con_admin, "studSite")
+studies<-tbl(con_admin, "studSITE")
 studies<-studies%>%collect()
+#just for testing since this data is prepared
+studies<-studies%>%filter(siteID == "ITA-BGL" | siteID == "ITA-MSF")
 
 
 es_study<-tbl(con_admin, "es_descr")
