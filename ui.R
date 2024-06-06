@@ -1,6 +1,6 @@
 # ui
 fluidPage(
-  titlePanel(title = "Mapping of ecosystem services for wind energy planning", windowTitle = "ES maps" ),
+  titlePanel(title = div(img(src="wendy.PNG", width ='120'), 'participatory mapping of nature values'), windowTitle = "ES maps" ),
   tabsetPanel(id = "inTabset",
               tabPanel(title = "Load study", value = "p0",
                           h5("Welcome and thanks for your interest in this study. Please provide your study id that you received from the study administrator"),

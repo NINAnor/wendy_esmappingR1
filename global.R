@@ -71,7 +71,7 @@ con_admin <- dbConnect(
 studies<-tbl(con_admin, "studSITE")
 studies<-studies%>%collect()
 #just for testing since this data is prepared
-studies<-studies%>%filter(siteID == "ITA-BGL" | siteID == "ITA-MSF")
+studies<-studies%>%filter((siteID == "ITA-BGL" | siteID == "ITA-MSF") & siteSTATUS == 1 & projID == project)
 
 
 es_study<-tbl(con_admin, "es_descr")
