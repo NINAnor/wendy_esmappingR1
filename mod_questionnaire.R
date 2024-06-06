@@ -262,7 +262,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, grd, si
         res_20 = as.integer(999)
       )
       # insert_upload_job(table_con$project, table_con$dataset, "mapper", quest)
-      mapper_tab = bq_table(project = project, dataset = dataset, table = 'mapper')
+      mapper_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'mapper')
       bq_table_upload(x = mapper_tab, values = quest, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
       remove_modal_spinner()
 
