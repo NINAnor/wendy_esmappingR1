@@ -26,7 +26,7 @@ library(shinyBS)
 library(shinybusy)
 library(googleCloudStorageR)
 library(terra)
-library(elevatr)
+
 
 
 
