@@ -1,5 +1,7 @@
 # ui
-fluidPage(
+fluidPage(theme = shinytheme("flatly"),
+  useShinydashboard(),
+  useShinyjs(),
   titlePanel(title = div(img(src="wendy.PNG", width ='120'), 'participatory mapping of nature values'), windowTitle = "ES maps" ),
   tabsetPanel(id = "inTabset",
               tabPanel(title = "Load study", value = "p0",

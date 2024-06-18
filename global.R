@@ -1,9 +1,11 @@
 ## global
 
 #### global file
-
+library(bslib)
 library(shiny)
+library(bsicons)
 library(shinyjs)
+library(shinythemes)
 library(bigrquery)
 library(leaflet)
 library(leaflet.extras)
